@@ -2,8 +2,8 @@ import type { Config } from 'tailwindcss'
 
 export default {
   content: [
-    "../../index.html",
-    "../../src/**/*.{js,ts,jsx,tsx}",
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -15,6 +15,7 @@ export default {
         }
       },
       fontFamily: {
+        oswald: ['Oswald', 'sans-serif'],
         display: ['Oswald', 'sans-serif'],
       }
     }
