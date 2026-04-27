@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseclient';
+import { supabase } from '../lib/supabaseClient';
 // Import shared professional UI components
 import { BrandBar, SecHead, Icon } from '../components/ui';
 import type { Athlete, Metric, CoachPanelProps } from '../types';
