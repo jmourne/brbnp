@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseclient';
+import { supabase } from '../lib/supabaseClient';
 import { BrandBar, SecHead, Icon, Toast, fmtDelta } from '../components/ui';
 import type { 
   Athlete, 
