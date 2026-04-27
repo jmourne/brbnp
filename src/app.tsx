@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './lib/supabaseClient';
+import { supabase } from './lib/supabaseclient';
 import type { Athlete, Route } from './types';
 
-// Import your actual component files here
-import { LoginScreen } from './components/LoginScreen'; 
-import { AthleteDashboard } from './components/AthleteDashboard';
-import { CoachPanel } from './components/CoachPanel';
+import { LoginScreen } from './pages/screen-login'; 
+import { AthleteDashboard } from './pages/screen-athlete';
+import { CoachPanel } from './pages/screen-coach';
 
 const App: React.FC = () => {
   const [route, setRoute] = useState<Route>({ name: 'login' });
   const [error, setError] = useState<string | null>(null);
 
-  // Check for admin path on load
   useEffect(() => {
     if (window.location.pathname === '/admin') {
       setRoute({ name: 'coach' });
@@ -21,7 +19,6 @@ const App: React.FC = () => {
   const handleAthleteLogin = async (inputName: string) => {
     setError(null);
     
-    // Corrected query: Using 'full_name' to match your Supabase schema
     const { data, error: sbError } = await supabase
       .from('athletes')
       .select('*')
@@ -56,7 +53,7 @@ const App: React.FC = () => {
 
       {route.name === 'athlete' && (
         <AthleteDashboard 
-          athlete={route.athlete} 
+          athlete={route.athlete!} 
           onBack={goLogin} 
           onLogout={goLogin} 
         />
