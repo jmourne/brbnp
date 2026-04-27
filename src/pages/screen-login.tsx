@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-// Import shared UI components
 import { Icon } from '../components/ui';
 import type { LoginScreenProps } from '../types';
 
@@ -16,34 +15,45 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
     setError('');
     setLoading(true);
 
-    if (tab === 'athlete') {
-      const trimmedName = name.trim();
-      if (!trimmedName) {
-        setError('Please enter your full name.');
-        setLoading(false);
-        return;
-      }
+    try {
+      if (tab === 'athlete') {
+        const trimmedName = name.trim();
+        if (!trimmedName) {
+          setError('Please enter your full name.');
+          setLoading(false);
+          return;
+        }
 
-      const { data, error: sbError } = await supabase
-        .from('athletes')
-        .select('*')
-        .ilike('full_name', trimmedName)
-        .single();
+        const { data, error: sbError } = await supabase
+          .from('athletes')
+          .select('*')
+          .ilike('full_name', trimmedName)
+          .single();
 
-      if (sbError || !data) {
-        setError('Athlete not found. Check your spelling or contact Coach Drew.');
+        if (sbError || !data) {
+          setError('Athlete not found. Check your spelling or contact Coach Drew.');
+        } else {
+          onAthleteLogin(data);
+        }
       } else {
-        onAthleteLogin(data);
+        // --- DYNAMIC COACH LOGIN ---
+        const { data, error: coachError } = await supabase
+          .from('coaches')
+          .select('*')
+          .eq('access_code', password.trim())
+          .single();
+
+        if (coachError || !data) {
+          setError('Invalid access code.');
+        } else {
+          onCoachLogin();
+        }
       }
-    } else {
-      // Coach/Admin Logic
-      if (password.toLowerCase() === 'barbarian' || password === '1234') {
-        onCoachLogin();
-      } else {
-        setError('Invalid admin password.');
-      }
+    } catch (err) {
+      setError('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -96,7 +106,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
                 <label className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase ml-1">Athlete Name</label>
                 <div className="relative mt-1">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600">
-                    {/* Replaced generic lucide icon with our brand Icon object */}
                     <Icon.Users size={18} />
                   </div>
                   <input 
@@ -110,14 +119,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
               </div>
             ) : (
               <div className="field">
-                <label className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase ml-1">Admin Password</label>
+                <label className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase ml-1">Access Code</label>
                 <div className="relative mt-1">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600">
                     <Icon.Shield size={18} />
                   </div>
                   <input 
                     type="password" 
-                    placeholder="••••••••" 
+                    placeholder="Enter Code" 
                     className="w-full bg-white border border-zinc-200 p-4 pl-12 rounded outline-none focus:border-[var(--red)] transition-all"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
