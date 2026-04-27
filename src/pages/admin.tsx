@@ -93,11 +93,11 @@ const AdminPanel: React.FC<AdminProps> = ({ onViewAthlete, onExit }) => {
         {activeTab === 'Athletes' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-4 bg-white p-6 rounded-xl border border-zinc-200 shadow-sm self-start">
-              <h2 className="text-lg font-bold mb-6">Add Athlete</h2>
+              <h2 className="text-lg font-bold mb-6 italic uppercase tracking-tighter">Add Athlete</h2>
               <div className="space-y-4">
                 <input className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600" placeholder="Full Name" value={athleteForm.name} onChange={e => setAthleteForm({...athleteForm, name: e.target.value})} />
                 <input className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600" placeholder="Sport (optional)" value={athleteForm.sport} onChange={e => setAthleteForm({...athleteForm, sport: e.target.value})} />
-                <button onClick={handleAddAthlete} className="w-full bg-orange-600 text-white font-bold py-3 rounded-lg hover:bg-orange-700 transition-colors">Add Athlete</button>
+                <button onClick={handleAddAthlete} className="w-full bg-orange-600 text-white font-bold py-3 rounded-lg hover:bg-orange-700 transition-colors uppercase tracking-widest text-xs">Add Athlete</button>
               </div>
             </div>
             <div className="lg:col-span-8 bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
@@ -109,7 +109,7 @@ const AdminPanel: React.FC<AdminProps> = ({ onViewAthlete, onExit }) => {
                     <p className="text-xs text-zinc-500">{a.sport || 'General'} • Joined {new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
                   </div>
                   <div className="flex items-center gap-4">
-                    <button onClick={() => onViewAthlete(a.id, a.name)} className="text-zinc-400 hover:text-zinc-900 font-bold text-xs flex items-center gap-1">
+                    <button onClick={() => onViewAthlete(a.id, a.name)} className="text-zinc-400 hover:text-orange-600 font-bold text-xs flex items-center gap-1 transition-colors">
                       View <span className="text-lg leading-none">→</span>
                     </button>
                     <button onClick={() => handleDeleteAthlete(a.id)} className="text-zinc-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all">🗑️</button>
@@ -124,7 +124,7 @@ const AdminPanel: React.FC<AdminProps> = ({ onViewAthlete, onExit }) => {
         {activeTab === 'Metrics' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-4 bg-white p-6 rounded-xl border border-zinc-200 shadow-sm self-start">
-              <h2 className="text-lg font-bold mb-6">Define Metric</h2>
+              <h2 className="text-lg font-bold mb-6 italic uppercase tracking-tighter">Define Metric</h2>
               <div className="space-y-4">
                 <input className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600" placeholder="e.g. Vertical Jump" value={metricForm.name} onChange={e => setMetricForm({...metricForm, name: e.target.value})} />
                 <input className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600" placeholder="Category (e.g. Power)" value={metricForm.category} onChange={e => setMetricForm({...metricForm, category: e.target.value})} />
@@ -132,26 +132,26 @@ const AdminPanel: React.FC<AdminProps> = ({ onViewAthlete, onExit }) => {
                 <div className="flex items-center justify-between p-3 bg-zinc-50 rounded-lg">
                   <div className="flex flex-col">
                     <span className="text-sm font-bold">Lower is Better</span>
-                    <span className="text-[10px] text-zinc-400 uppercase">For time/sprints</span>
+                    <span className="text-[10px] text-zinc-400 uppercase font-black">For time/sprints</span>
                   </div>
-                  <input type="checkbox" className="w-5 h-5 accent-orange-600" checked={metricForm.lower_is_better} onChange={e => setMetricForm({...metricForm, lower_is_better: e.target.checked})} />
+                  <input type="checkbox" className="w-5 h-5 accent-orange-600 cursor-pointer" checked={metricForm.lower_is_better} onChange={e => setMetricForm({...metricForm, lower_is_better: e.target.checked})} />
                 </div>
-                <button onClick={handleAddMetric} className="w-full bg-orange-600 text-white font-bold py-3 rounded-lg hover:bg-orange-700 transition-colors">Add Metric</button>
+                <button onClick={handleAddMetric} className="w-full bg-orange-600 text-white font-bold py-3 rounded-lg hover:bg-orange-700 transition-colors uppercase tracking-widest text-xs">Add Metric</button>
               </div>
             </div>
             <div className="lg:col-span-8 bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
               <div className="p-4 border-b border-zinc-200 bg-zinc-50 font-bold text-sm flex justify-between">
                 <span>Tracked Metrics ({metrics.length})</span>
               </div>
-              <div className="divide-y divide-zinc-100">
+              <div className="divide-y divide-zinc-100 max-h-[600px] overflow-y-auto">
                 {metrics.map(m => (
                   <div key={m.id} className="p-4 flex justify-between items-center hover:bg-zinc-50 group transition-colors">
                     <div>
                       <p className="font-bold">{m.name}</p>
-                      <p className="text-xs text-zinc-500 uppercase">{m.category} • {m.unit}</p>
+                      <p className="text-xs text-zinc-500 uppercase font-black tracking-tight">{m.category} • {m.unit || 'no unit'}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      {m.lower_is_better && <span className="bg-zinc-100 text-zinc-500 text-[9px] font-black px-2 py-1 rounded">LOWER = BETTER</span>}
+                      {m.lower_is_better && <span className="bg-orange-100 text-orange-700 text-[9px] font-black px-2 py-1 rounded italic uppercase">Lower = Better</span>}
                       <button onClick={() => handleDeleteMetric(m.id)} className="text-zinc-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all">🗑️</button>
                     </div>
                   </div>
@@ -163,21 +163,33 @@ const AdminPanel: React.FC<AdminProps> = ({ onViewAthlete, onExit }) => {
 
         {/* LOG DATA TAB */}
         {activeTab === 'Log Data' && (
-          <div className="max-w-xl mx-auto bg-white p-8 rounded-xl border border-zinc-200 shadow-sm">
-            <h2 className="text-xl font-bold mb-2 italic">Manual Data Entry</h2>
+          <div className="max-w-xl mx-auto bg-white p-8 rounded-xl border border-zinc-200 shadow-sm animate-in fade-in slide-in-from-bottom-4">
+            <h2 className="text-xl font-bold mb-2 italic uppercase tracking-tighter">Manual Data Entry</h2>
             <p className="text-sm text-zinc-500 mb-8 font-medium">Log a workout or test result on behalf of an athlete.</p>
             <div className="space-y-6">
-              <select className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600 font-bold uppercase text-sm" value={logForm.athlete_id} onChange={e => setLogForm({...logForm, athlete_id: e.target.value})}>
-                <option value="">Select athlete</option>
-                {athletes.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </select>
-              <select className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600 font-bold uppercase text-sm" value={logForm.metric_id} onChange={e => setLogForm({...logForm, metric_id: e.target.value})}>
-                <option value="">Select metric</option>
-                {metrics.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-              </select>
-              <input type="number" step="0.1" className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600 font-bold text-lg" placeholder="Value (e.g. 24.5)" value={logForm.value} onChange={e => setLogForm({...logForm, value: e.target.value})} />
-              <input className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600" placeholder="Notes (optional)" value={logForm.notes} onChange={e => setLogForm({...logForm, notes: e.target.value})} />
-              <button onClick={handleLogData} className="w-full bg-orange-600 text-white font-bold py-4 rounded-lg hover:bg-orange-700 transition-all active:scale-[0.98]">Log Performance Data</button>
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase mb-1 block">Athlete</label>
+                <select className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600 font-bold uppercase text-sm bg-white" value={logForm.athlete_id} onChange={e => setLogForm({...logForm, athlete_id: e.target.value})}>
+                  <option value="">Select athlete</option>
+                  {athletes.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase mb-1 block">Metric</label>
+                <select className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600 font-bold uppercase text-sm bg-white" value={logForm.metric_id} onChange={e => setLogForm({...logForm, metric_id: e.target.value})}>
+                  <option value="">Select metric</option>
+                  {metrics.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase mb-1 block">Value</label>
+                <input type="number" step="0.1" className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600 font-bold text-lg" placeholder="0.0" value={logForm.value} onChange={e => setLogForm({...logForm, value: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-zinc-400 uppercase mb-1 block">Notes</label>
+                <input className="w-full border border-zinc-200 p-3 rounded-lg outline-none focus:border-orange-600" placeholder="Optional notes..." value={logForm.notes} onChange={e => setLogForm({...logForm, notes: e.target.value})} />
+              </div>
+              <button onClick={handleLogData} className="w-full bg-orange-600 text-white font-bold py-4 rounded-lg hover:bg-orange-700 transition-all active:scale-[0.98] uppercase tracking-[0.2em] text-sm">Log Performance Data</button>
             </div>
           </div>
         )}
