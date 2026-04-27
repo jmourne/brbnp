@@ -9,9 +9,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   db: {
-    schema: 'public'
-  },
-  global: {
-    headers: { 'x-my-custom-schema': 'private' } 
+    schemas: ['public', 'private'] 
   }
 });
