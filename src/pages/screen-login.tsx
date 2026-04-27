@@ -1,0 +1,152 @@
+import React, { useState } from 'react';
+import { User, Lock, ArrowRight, MessageSquare } from 'lucide-react';
+import { supabase } from '../lib/supabaseclient';
+import type { LoginScreenProps } from '../types';
+
+export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoachLogin }) => {
+  const [tab, setTab] = useState<'athlete' | 'coach'>('athlete');
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (tab === 'athlete') {
+      const trimmedName = name.trim();
+      if (!trimmedName) {
+        setError('Please enter your full name.');
+        setLoading(false);
+        return;
+      }
+
+      // Query Supabase for the athlete by full_name
+      const { data, error: sbError } = await supabase
+        .from('athletes')
+        .select('*')
+        .ilike('full_name', trimmedName)
+        .single();
+
+      if (sbError || !data) {
+        setError('Athlete not found. Check your spelling or contact Coach.');
+      } else {
+        onAthleteLogin(data);
+      }
+    } else {
+      // Coach Login Logic
+      if (password.toLowerCase() === 'barbarian' || password === '1234') {
+        onCoachLogin();
+      } else {
+        setError('Invalid admin password.');
+      }
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="login-bg">
+      <div className="login-left">
+        <div>
+          <div className="kicker">
+            <span className="bar" /> EST. 2023 — MELISSA, TX
+          </div>
+          <h1 className="font-oswald uppercase italic leading-[0.9] mt-6">
+            STRENGTH.<br />
+            SPEED.<br />
+            <span className="text-[var(--red)]">POWER.</span>
+          </h1>
+          <p className="mt-8 text-zinc-400 max-w-sm leading-relaxed">
+            Barbarian Performance Athlete Portal. Log every rep, sprint, and jump. 
+            Track your progression. No gimmicks — just results.
+          </p>
+        </div>
+        <div className="footer-row text-[10px] opacity-40 uppercase tracking-[0.2em]">
+          Portal v2.4 · Coach Drew Little · 900+ Athletes Trained
+        </div>
+      </div>
+
+      <div className="login-right flex items-center justify-center p-8">
+        <div className="login-card w-full max-w-md">
+          <div className="sublabel text-[var(--red)] font-bold tracking-widest text-[10px]">
+            PORTAL ACCESS
+          </div>
+          <h2 className="text-4xl font-black font-oswald uppercase italic mt-2">Sign In</h2>
+          
+          <div className="login-tabs flex border border-zinc-800 rounded mt-6 overflow-hidden">
+            <button 
+              className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all ${tab === 'athlete' ? 'bg-zinc-800 text-white' : 'text-zinc-500'}`}
+              onClick={() => { setTab('athlete'); setError(''); }}
+            >
+              Athlete
+            </button>
+            <button 
+              className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all ${tab === 'coach' ? 'bg-zinc-800 text-white' : 'text-zinc-500'}`}
+              onClick={() => { setTab('coach'); setError(''); }}
+            >
+              Coach
+            </button>
+          </div>
+
+          <form onSubmit={handleLogin} className="mt-8 space-y-4">
+            {tab === 'athlete' ? (
+              <div className="field">
+                <label className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase ml-1">Athlete Name</label>
+                <div className="relative mt-1">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="John Smith" 
+                    className="w-full bg-white border border-zinc-200 p-4 pl-12 rounded outline-none focus:border-[var(--red)] transition-all"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="field">
+                <label className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase ml-1">Admin Password</label>
+                <div className="relative mt-1">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
+                  <input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    className="w-full bg-white border border-zinc-200 p-4 pl-12 rounded outline-none focus:border-[var(--red)] transition-all"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-red-50 text-[var(--red)] text-[10px] font-bold uppercase p-3 rounded border border-red-100 flex items-center gap-2">
+                <span>⚠</span> {error}
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="btn-red w-full py-4 flex items-center justify-center gap-2 text-sm font-black italic tracking-widest"
+            >
+              {loading ? 'VERIFYING...' : tab === 'athlete' ? 'ACCESS DASHBOARD' : 'ENTER ADMIN'}
+              {!loading && <ArrowRight size={18} />}
+            </button>
+          </form>
+
+          <div className="mt-8 text-center">
+            <a 
+              href="sms:+14054749227" 
+              className="text-[10px] font-bold text-zinc-400 hover:text-[var(--red)] transition-colors uppercase tracking-widest flex items-center justify-center gap-2"
+            >
+              <MessageSquare size={14} /> Need Help? Text Coach
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
