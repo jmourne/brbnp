@@ -7,9 +7,10 @@ import type { Athlete, Metric, CoachPanelProps } from '../types';
 // --- Sub-Component: Athlete Roster Management ---
 interface AdminAthletesProps {
   onView: (a: Athlete) => void;
+  coachCode: string; // Added to pass the "Key" to the DB
 }
 
-const AdminAthletes: React.FC<AdminAthletesProps> = ({ onView }) => {
+const AdminAthletes: React.FC<AdminAthletesProps> = ({ onView, coachCode }) => {
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [name, setName] = useState('');
   const [sport, setSport] = useState('');
@@ -18,6 +19,7 @@ const AdminAthletes: React.FC<AdminAthletesProps> = ({ onView }) => {
   useEffect(() => { fetchAthletes(); }, []);
 
   const fetchAthletes = async () => {
+    // Read access is public, no header needed
     const { data, error } = await supabase
       .from('athletes')
       .select('*')
@@ -33,6 +35,7 @@ const AdminAthletes: React.FC<AdminAthletesProps> = ({ onView }) => {
     const { data, error } = await supabase
       .from('athletes')
       .insert([{ full_name: name.trim(), sport: sport.trim() || 'Unassigned' }])
+      .setHeaders({ 'x-coach-code': coachCode }) // UNLOCKS RLS
       .select()
       .single();
 
@@ -40,12 +43,23 @@ const AdminAthletes: React.FC<AdminAthletesProps> = ({ onView }) => {
       setAthletes([...athletes, data]);
       setName('');
       setSport('');
+    } else if (error) {
+      alert("Permission Denied: " + error.message);
     }
   };
 
   const removeAthlete = async (id: number) => {
-    const { error } = await supabase.from('athletes').delete().eq('id', id);
-    if (!error) setAthletes(athletes.filter(a => a.id !== id));
+    const { error } = await supabase
+      .from('athletes')
+      .delete()
+      .eq('id', id)
+      .setHeaders({ 'x-coach-code': coachCode }); // UNLOCKS RLS
+
+    if (!error) {
+      setAthletes(athletes.filter(a => a.id !== id));
+    } else {
+      alert("Unauthorized to delete athletes.");
+    }
   };
 
   return (
@@ -109,7 +123,7 @@ const AdminAthletes: React.FC<AdminAthletesProps> = ({ onView }) => {
 };
 
 // --- Sub-Component: Metric Definitions ---
-const AdminMetrics: React.FC = () => {
+const AdminMetrics: React.FC<{ coachCode: string }> = ({ coachCode }) => {
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [name, setName] = useState('');
   const [cat, setCat] = useState('');
@@ -129,10 +143,14 @@ const AdminMetrics: React.FC = () => {
     const { data, error } = await supabase
       .from('metrics')
       .insert([{ name: name.trim(), category: cat.trim(), lower_is_better: lower }])
+      .setHeaders({ 'x-coach-code': coachCode }) // UNLOCKS RLS
       .select().single();
+
     if (!error && data) {
       setMetrics([...metrics, data]);
       setName(''); setCat(''); setLower(false);
+    } else if (error) {
+      alert("Unauthorized to create metrics.");
     }
   };
 
@@ -177,7 +195,7 @@ const AdminMetrics: React.FC = () => {
 };
 
 // --- Main Coach Panel ---
-export const CoachPanel: React.FC<CoachPanelProps> = ({ onExit, onViewAthlete }) => {
+export const CoachPanel: React.FC<CoachPanelProps> = ({ onExit, onViewAthlete, coachCode }) => {
   const [tab, setTab] = useState<'athletes' | 'metrics' | 'log' | 'import'>('athletes');
 
   return (
@@ -200,8 +218,8 @@ export const CoachPanel: React.FC<CoachPanelProps> = ({ onExit, onViewAthlete })
         </div>
 
         <div className="tab-content animate-in fade-in slide-in-from-bottom-2 duration-300">
-          {tab === 'athletes' && <AdminAthletes onView={onViewAthlete} />}
-          {tab === 'metrics' && <AdminMetrics />}
+          {tab === 'athletes' && <AdminAthletes onView={onViewAthlete} coachCode={coachCode} />}
+          {tab === 'metrics' && <AdminMetrics coachCode={coachCode} />}
           {tab === 'log' && <div className="panel text-center p-20 font-oswald italic text-zinc-400">Manual Log Interface Under Construction</div>}
           {tab === 'import' && <div className="panel text-center p-20 font-oswald italic text-zinc-400">CSV Import Interface Under Construction</div>}
         </div>
