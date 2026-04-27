@@ -1,25 +1,25 @@
 export interface Athlete {
   id: number;
-  full_name: string | null;
+  full_name: string; // Removed | null as these are required for logic
   sport: string | null;
   created_at: string | null;
 }
 
 export interface Metric {
   id: number;
-  name: string | null;
-  category: string | null;
+  name: string;
+  category: string;
   unit: string | null;
   description: string | null;
-  lower_is_better: boolean | null;
+  lower_is_better: boolean;
   created_at: string | null;
 }
 
 export interface Entry {
   id: number;
-  athlete_id: number | null;
-  metric_id: number | null;
-  value: number | null;
+  athlete_id: number;
+  metric_id: number;
+  value: number;
   notes: string | null;
   recorded_at: string | null;
 }
@@ -39,7 +39,8 @@ declare global {
 
 export interface LoginScreenProps {
   onAthleteLogin: (a: Athlete) => void;
-  onCoachLogin: () => void;
+  // Updated to accept the code from the login input
+  onCoachLogin: (code: string) => void; 
 }
 
 export interface AthleteDashboardProps {
@@ -51,6 +52,8 @@ export interface AthleteDashboardProps {
 export interface CoachPanelProps {
   onExit: () => void;
   onViewAthlete: (a: Athlete) => void;
+  // This is the key that will be used in .setHeaders() 
+  coachCode: string; 
 }
 
 export {};
