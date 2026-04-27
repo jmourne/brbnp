@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './lib/supabaseclient';
+import { supabase } from './lib/supabaseClient';
 import type { Athlete, Route } from './types';
 
 import { LoginScreen } from './pages/screen-login'; 
@@ -51,9 +51,9 @@ const App: React.FC = () => {
         />
       )}
 
-      {route.name === 'athlete' && (
+      {route.name === 'athlete' && route.athlete && (
         <AthleteDashboard 
-          athlete={route.athlete!} 
+          athlete={route.athlete} 
           onBack={goLogin} 
           onLogout={goLogin} 
         />
