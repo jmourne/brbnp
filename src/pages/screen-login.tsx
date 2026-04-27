@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { User, Lock, ArrowRight, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabaseclient';
+// Import shared UI components
+import { Icon } from '../components/ui';
 import type { LoginScreenProps } from '../types';
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoachLogin }) => {
@@ -23,7 +24,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
         return;
       }
 
-      // Query Supabase for the athlete by full_name
       const { data, error: sbError } = await supabase
         .from('athletes')
         .select('*')
@@ -31,12 +31,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
         .single();
 
       if (sbError || !data) {
-        setError('Athlete not found. Check your spelling or contact Coach.');
+        setError('Athlete not found. Check your spelling or contact Coach Drew.');
       } else {
         onAthleteLogin(data);
       }
     } else {
-      // Coach Login Logic
+      // Coach/Admin Logic
       if (password.toLowerCase() === 'barbarian' || password === '1234') {
         onCoachLogin();
       } else {
@@ -95,7 +95,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
               <div className="field">
                 <label className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase ml-1">Athlete Name</label>
                 <div className="relative mt-1">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600">
+                    {/* Replaced generic lucide icon with our brand Icon object */}
+                    <Icon.Users size={18} />
+                  </div>
                   <input 
                     type="text" 
                     placeholder="John Smith" 
@@ -109,7 +112,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
               <div className="field">
                 <label className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase ml-1">Admin Password</label>
                 <div className="relative mt-1">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={18} />
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600">
+                    <Icon.Shield size={18} />
+                  </div>
                   <input 
                     type="password" 
                     placeholder="••••••••" 
@@ -123,7 +128,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
 
             {error && (
               <div className="bg-red-50 text-[var(--red)] text-[10px] font-bold uppercase p-3 rounded border border-red-100 flex items-center gap-2">
-                <span>⚠</span> {error}
+                <span className="animate-pulse">⚠</span> {error}
               </div>
             )}
 
@@ -133,7 +138,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
               className="btn-red w-full py-4 flex items-center justify-center gap-2 text-sm font-black italic tracking-widest"
             >
               {loading ? 'VERIFYING...' : tab === 'athlete' ? 'ACCESS DASHBOARD' : 'ENTER ADMIN'}
-              {!loading && <ArrowRight size={18} />}
+              {!loading && <Icon.ArrowRight size={18} />}
             </button>
           </form>
 
@@ -142,7 +147,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
               href="sms:+14054749227" 
               className="text-[10px] font-bold text-zinc-400 hover:text-[var(--red)] transition-colors uppercase tracking-widest flex items-center justify-center gap-2"
             >
-              <MessageSquare size={14} /> Need Help? Text Coach
+              <Icon.Pulse size={14} /> Need Help? Text Coach
             </a>
           </div>
         </div>
