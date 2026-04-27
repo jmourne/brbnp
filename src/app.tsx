@@ -1,68 +1,75 @@
 import React, { useState, useEffect } from 'react';
-import LandingPage from './pages/home';
-import AthleteDashboard from './pages/dashboard';
-import AdminPanel from './pages/admin';
 import { supabase } from './lib/supabaseClient';
+import type { Athlete, Route } from './types';
 
-function App() {
-  const [athlete, setAthlete] = useState<{ id: number; name: string } | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+// Import your actual component files here
+import { LoginScreen } from './components/LoginScreen'; 
+import { AthleteDashboard } from './components/AthleteDashboard';
+import { CoachPanel } from './components/CoachPanel';
+
+const App: React.FC = () => {
+  const [route, setRoute] = useState<Route>({ name: 'login' });
   const [error, setError] = useState<string | null>(null);
 
-  // Check URL on load for /admin path
+  // Check for admin path on load
   useEffect(() => {
     if (window.location.pathname === '/admin') {
-      setIsAdmin(true);
+      setRoute({ name: 'coach' });
     }
   }, []);
 
-  const handleLogin = async (inputName: string) => {
+  const handleAthleteLogin = async (inputName: string) => {
     setError(null);
+    
+    // Corrected query: Using 'full_name' to match your Supabase schema
     const { data, error: sbError } = await supabase
       .from('athletes')
-      .select('id, name')
-      .ilike('name', inputName.trim()) 
+      .select('*')
+      .ilike('full_name', inputName.trim())
       .single();
 
     if (sbError || !data) {
-      setError("Athlete not found.");
+      setError("Athlete not found. Please check spelling.");
       return;
     }
-    setAthlete({ id: data.id, name: data.name });
+
+    setRoute({ name: 'athlete', athlete: data as Athlete });
   };
 
-  // Bridge function for Coach to view specific athlete
-  const handleViewAthlete = (id: number, name: string) => {
-    setAthlete({ id, name });
-    setIsAdmin(false);
-  };
-
-  const handleExit = () => {
-    setIsAdmin(false);
-    setAthlete(null);
+  const goLogin = () => {
+    setError(null);
+    setRoute({ name: 'login' });
     window.history.pushState({}, '', '/');
   };
 
+  const goCoach = () => setRoute({ name: 'coach' });
+
   return (
     <main className="min-h-screen bg-black">
-      {isAdmin ? (
-        <AdminPanel 
-          onViewAthlete={handleViewAthlete} 
-          onExit={handleExit} 
+      {route.name === 'login' && (
+        <LoginScreen 
+          onAthleteLogin={handleAthleteLogin} 
+          onCoachLogin={goCoach} 
+          error={error} 
         />
-      ) : athlete ? (
+      )}
+
+      {route.name === 'athlete' && (
         <AthleteDashboard 
-          athleteId={athlete.id} 
-          athleteName={athlete.name} 
+          athlete={route.athlete} 
+          onBack={goLogin} 
+          onLogout={goLogin} 
         />
-      ) : (
-        <LandingPage 
-          onLogin={handleLogin} 
-          loginError={error}
+      )}
+
+      {route.name === 'coach' && (
+        <CoachPanel 
+          onExit={goLogin} 
+          onViewAthlete={(a) => setRoute({ name: 'athlete', athlete: a })} 
         />
       )}
     </main>
   );
-}
+};
 
 export default App;
