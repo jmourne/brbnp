@@ -39,19 +39,21 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
         // --- SECURE COACH LOGIN ---
         const cleanCode = password.trim();
         
-        // We call the function in the 'private' schema to avoid security warnings
+        // We MUST specify the 'private' schema here because we moved the function 
+        // there to clear your Supabase Security Warnings.
         const { data: isValid, error: coachError } = await supabase.rpc(
           'check_is_coach', 
           { provided_code: cleanCode },
-          { schema: 'private' } // <--- THIS IS THE FIX
+          { schema: 'private' } 
         );
 
         if (coachError) {
-          console.error("RPC Error:", coachError.message);
-          setError('Verification service unavailable.');
+          console.error("Login Service Error:", coachError.message);
+          setError('VERIFICATION SERVICE UNAVAILABLE.');
         } else if (!isValid) {
-          setError('Invalid access code.');
+          setError('INVALID ACCESS CODE.');
         } else {
+          // Pass the code so the CoachPanel can use it for RLS headers
           onCoachLogin(cleanCode);
         }
       }
