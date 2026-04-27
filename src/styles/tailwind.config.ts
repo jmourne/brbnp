@@ -1,5 +1,11 @@
-// default style
+import type { Config } from 'tailwindcss'
+
 export default {
+  // Add this 'content' section so Tailwind sees your files!
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     extend: {
       colors: {
@@ -10,8 +16,9 @@ export default {
         }
       },
       fontFamily: {
-        display: ['Oswald', 'sans-serif'], // For that aggressive header look
+        display: ['Oswald', 'sans-serif'],
       }
     }
-  }
-}
+  },
+  plugins: [],
+} satisfies Config
