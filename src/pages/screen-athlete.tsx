@@ -1,19 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  ChevronLeft, 
-  Plus, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  LogOut, 
-  Award, 
-  Clock 
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseclient';
+import { BrandBar, SecHead, Icon, Toast, fmtDelta } from '../components/ui';
 import type { 
   Athlete, 
   Metric, 
-  HistoryEntry, 
-  LogEntryInput, 
   AthleteDashboardProps 
 } from '../types';
 
@@ -28,8 +18,8 @@ const MetricCard: React.FC<{ m: any }> = ({ m }) => {
         <div className="name font-bold uppercase tracking-tight">{m.name}</div>
         {m.delta !== 0 && (
           <span className={`delta-chip ${isImproved ? 'good' : 'warn'}`}>
-            {isImproved ? <ArrowUpRight size={12}/> : <ArrowDownRight size={12}/>}
-            {Math.abs(m.delta).toFixed(1)}
+            {isImproved ? <Icon.ArrowUpRight size={12}/> : <Icon.ArrowDownRight size={12}/>}
+            {fmtDelta(Math.abs(m.delta))}
           </span>
         )}
       </div>
@@ -37,7 +27,7 @@ const MetricCard: React.FC<{ m: any }> = ({ m }) => {
         <div className="lbl text-[10px] text-zinc-500 font-bold tracking-widest uppercase">Latest</div>
         <div className="val text-3xl font-black font-mono">
           {m.latest} <span className="unit text-sm font-normal text-zinc-400">{m.unit}</span>
-          {m.isBest && <span className="best-tag ml-2 bg-[var(--red)] text-[10px] px-1.5 py-0.5 text-white">PB</span>}
+          {m.isBest && <span className="best-tag ml-2 bg-[var(--red)] text-[10px] px-1.5 py-0.5 text-white italic">PB</span>}
         </div>
       </div>
       <div className="metric-foot mt-4 pt-4 border-t border-zinc-100 grid grid-cols-2 gap-4">
@@ -81,7 +71,7 @@ const LogEntryBar: React.FC<{ metrics: Metric[], onLog: (e: any) => void }> = ({
           <input type="number" value={value} onChange={(e) => setValue(e.target.value)} placeholder="0.0" />
         </div>
         <button onClick={submit} className="btn-red h-[42px] px-6 flex items-center gap-2">
-          LOG <Plus size={16}/>
+          LOG <Icon.Plus size={16}/>
         </button>
       </div>
     </div>
@@ -93,24 +83,20 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ athlete, onB
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState('');
 
-  useEffect(() => {
-    loadAthleteData();
-  }, [athlete.id]);
+  useEffect(() => { loadAthleteData(); }, [athlete.id]);
 
   const loadAthleteData = async () => {
-    // 1. Fetch available metrics
-    const { data: metricsData } = await supabase.from('metrics').select('*').order('name');
-    
-    // 2. Fetch athlete's entries
-    const { data: entriesData } = await supabase
+    const { data: mData } = await supabase.from('metrics').select('*').order('name');
+    const { data: eData } = await supabase
       .from('entries')
       .select(`*, metrics(name, unit, category, lower_is_better)`)
       .eq('athlete_id', athlete.id)
       .order('recorded_at', { ascending: false });
 
-    if (metricsData) setMetrics(metricsData);
-    if (entriesData) setHistory(entriesData);
+    if (mData) setMetrics(mData);
+    if (eData) setHistory(eData);
     setLoading(false);
   };
 
@@ -122,48 +108,41 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ athlete, onB
       recorded_at: new Date().toISOString()
     }]);
 
-    if (!error) loadAthleteData(); // Refresh data
+    if (!error) {
+      setToast('ENTRY LOGGED SUCCESSFULLY');
+      loadAthleteData();
+      setTimeout(() => setToast(''), 3000);
+    }
   };
 
-  if (loading) return <div className="p-20 text-center font-oswald animate-pulse">SYNCING PERFORMANCE DATA...</div>;
+  if (loading) return <div className="p-20 text-center font-oswald animate-pulse">SYNCING DATA...</div>;
 
   return (
     <div className="min-h-screen bg-[var(--paper-2)] pb-32">
-      <header className="brandbar">
-        <div className="brandbar-inner">
-          <div className="brand-wordmark font-oswald uppercase text-xl italic">
-            BARBARIAN <span className="text-[var(--red)]">PERFORMANCE</span>
-          </div>
-          <button onClick={onLogout} className="ml-auto text-xs font-bold opacity-60 hover:opacity-100 flex items-center gap-2">
-            LOGOUT <LogOut size={14}/>
-          </button>
-        </div>
-      </header>
+      <BrandBar user={athlete.full_name.toUpperCase()} onLogout={onLogout} />
 
       <main className="shell p-6">
-        <div className="athlete-strip flex items-center gap-6 bg-white p-6 rounded-lg border border-zinc-200">
-          <button onClick={onBack} className="iconbtn p-2 hover:bg-zinc-100 rounded"><ChevronLeft/></button>
+        <div className="athlete-strip flex items-center gap-6 bg-white p-6 rounded-lg border border-zinc-200 shadow-sm">
+          <button onClick={onBack} className="iconbtn p-2 hover:bg-zinc-100 rounded">
+            <Icon.ChevronLeft size={24}/>
+          </button>
           <div className="athlete-id flex-1">
-            <h1 className="text-3xl font-black font-oswald uppercase tracking-tighter italic">{athlete.full_name}</h1>
-            <p className="text-xs font-bold text-[var(--red)] uppercase tracking-widest">{athlete.sport}</p>
+            <h1 className="text-3xl font-black font-oswald uppercase tracking-tighter italic leading-none">{athlete.full_name}</h1>
+            <p className="text-xs font-bold text-[var(--red)] uppercase tracking-widest mt-1">{athlete.sport}</p>
           </div>
           <div className="stats flex gap-8">
             <div className="text-center">
-              <div className="text-[10px] text-zinc-400 font-bold uppercase">Logs</div>
+              <div className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">Logs</div>
               <div className="text-xl font-black">{history.length}</div>
             </div>
           </div>
-          <div className="avatar w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold">
+          <div className="avatar w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold font-oswald italic">
             {athlete.full_name.charAt(0)}
           </div>
         </div>
 
-        <div className="sec-head mt-12 mb-6 flex items-center gap-4">
-          <div className="accent-bar w-1 h-8 bg-[var(--red)]"></div>
-          <h2 className="text-2xl font-black font-oswald uppercase italic">Performance Metrics</h2>
-        </div>
+        <SecHead title="Performance Metrics" meta={`${metrics.length} CATEGORIES`} />
 
-        {/* This is a simplified grid. You can group these by category if needed. */}
         <div className="metric-grid grid grid-cols-1 md:grid-cols-3 gap-4">
           {metrics.map(m => {
             const mEntries = history.filter(h => h.metric_id === m.id);
@@ -187,6 +166,7 @@ export const AthleteDashboard: React.FC<AthleteDashboardProps> = ({ athlete, onB
       </main>
 
       <LogEntryBar metrics={metrics} onLog={handleLog}/>
+      <Toast msg={toast} />
     </div>
   );
 };
