@@ -36,17 +36,21 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
           onAthleteLogin(data);
         }
       } else {
-        // --- DYNAMIC COACH LOGIN ---
-        const { data, error: coachError } = await supabase
-          .from('coaches')
-          .select('*')
-          .eq('access_code', password.trim())
-          .single();
+        // --- SECURE COACH LOGIN VIA RPC ---
+        const cleanCode = password.trim();
+        
+        // We call the database function instead of the table directly
+        const { data: isValid, error: coachError } = await supabase
+          .rpc('check_is_coach', { provided_code: cleanCode });
 
-        if (coachError || !data) {
+        if (coachError) {
+          console.error("RPC Error:", coachError.message);
+          setError('Verification service unavailable.');
+        } else if (!isValid) {
           setError('Invalid access code.');
         } else {
-          onCoachLogin();
+          // Pass the code to onCoachLogin so it can be used for RLS headers
+          onCoachLogin(cleanCode);
         }
       }
     } catch (err) {
@@ -87,12 +91,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
           
           <div className="login-tabs flex border border-zinc-800 rounded mt-6 overflow-hidden">
             <button 
+              type="button"
               className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all ${tab === 'athlete' ? 'bg-zinc-800 text-white' : 'text-zinc-500'}`}
               onClick={() => { setTab('athlete'); setError(''); }}
             >
               Athlete
             </button>
             <button 
+              type="button"
               className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all ${tab === 'coach' ? 'bg-zinc-800 text-white' : 'text-zinc-500'}`}
               onClick={() => { setTab('coach'); setError(''); }}
             >
@@ -111,7 +117,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
                   <input 
                     type="text" 
                     placeholder="John Smith" 
-                    className="w-full bg-white border border-zinc-200 p-4 pl-12 rounded outline-none focus:border-[var(--red)] transition-all"
+                    className="w-full bg-white border border-zinc-200 p-4 pl-12 rounded outline-none focus:border-[var(--red)] transition-all text-black"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -127,7 +133,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
                   <input 
                     type="password" 
                     placeholder="Enter Code" 
-                    className="w-full bg-white border border-zinc-200 p-4 pl-12 rounded outline-none focus:border-[var(--red)] transition-all"
+                    className="w-full bg-white border border-zinc-200 p-4 pl-12 rounded outline-none focus:border-[var(--red)] transition-all text-black"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
