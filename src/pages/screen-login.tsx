@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../lib/supabaseclient';
+import { supabase } from '../lib/supabaseClient';
 // Import shared UI components
 import { Icon } from '../components/ui';
 import type { LoginScreenProps } from '../types';
