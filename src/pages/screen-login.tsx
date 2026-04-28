@@ -15,7 +15,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
     setError('');
     setLoading(true);
 
-try {
+    try {
       if (tab === 'athlete') {
         const athleteName = typeof name === 'string' ? name : '';
         const trimmedName = athleteName.trim();
@@ -43,7 +43,6 @@ try {
         // --- SECURE COACH LOGIN ---
         const cleanCode = password.trim();
         
-        // This calls your function in the private schema
         const { data: isValid, error: coachError } = await supabase.rpc(
           'check_is_coach', 
           { provided_code: cleanCode },
@@ -64,10 +63,12 @@ try {
         }
       }
     } catch (err) {
+      console.error("System Error:", err);
       setError('Connection error. Please try again.');
     } finally {
       setLoading(false);
-    };
+    }
+  };
 
   return (
     <div className="login-bg">
