@@ -95,7 +95,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
           <div className="sublabel text-[var(--red)] font-bold tracking-widest text-[10px]">
             PORTAL ACCESS
           </div>
-          <h2 className="text-4xl font-black font-oswald uppercase italic mt-2 text-white">Sign In</h2>
+          <h2 className="text-4xl font-black font-oswald uppercase italic mt-2 text-black">Sign In</h2>
           
           <div className="login-tabs flex border border-zinc-800 rounded mt-6 overflow-hidden">
             <button 
