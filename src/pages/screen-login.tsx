@@ -17,7 +17,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
 
 try {
       if (tab === 'athlete') {
-        const trimmedName = name.trim();
+        const trimmedName = (name || '').trim();
+        
         if (!trimmedName) {
           setError('Please enter your full name.');
           setLoading(false);
@@ -31,11 +32,13 @@ try {
           .single();
 
         if (sbError || !data) {
+          console.error("Athlete Lookup Error:", sbError);
           setError('Athlete not found. Check your spelling or contact Coach Drew.');
         } else {
-          onAthleteLogin(data);
+          onAthleteLogin(data); // transitions athlete to their dashboard
         }
       } else {
+        
         // --- SECURE COACH LOGIN ---
         const cleanCode = password.trim();
         
