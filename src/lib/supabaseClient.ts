@@ -5,6 +5,13 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   db: {
-    schema: 'public' // Keep this as a single string
+    schema: 'public'
+  },
+  global: {
+    headers: {
+      // This pulls the code from the browser's storage 
+      // where you save it during the coach "login"
+      'x-coach-code': localStorage.getItem('coach_code') || ''
+    }
   }
 });
