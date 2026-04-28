@@ -15,7 +15,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
     setError('');
     setLoading(true);
 
-    try {
+try {
       if (tab === 'athlete') {
         const trimmedName = name.trim();
         if (!trimmedName) {
@@ -39,8 +39,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
         // --- SECURE COACH LOGIN ---
         const cleanCode = password.trim();
         
-        // We MUST specify the 'private' schema here because we moved the function 
-        // there to clear your Supabase Security Warnings.
+        // This calls your function in the private schema
         const { data: isValid, error: coachError } = await supabase.rpc(
           'check_is_coach', 
           { provided_code: cleanCode },
@@ -53,7 +52,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
         } else if (!isValid) {
           setError('INVALID ACCESS CODE.');
         } else {
-          // Pass the code so the CoachPanel can use it for RLS headers
+          // 1. SAVE to localStorage so supabaseClient.ts can inject the x-coach-code header
+          localStorage.setItem('coach_code', cleanCode);
+          
+          // 2. TRIGGER the login transition
           onCoachLogin(cleanCode);
         }
       }
@@ -61,8 +63,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
       setError('Connection error. Please try again.');
     } finally {
       setLoading(false);
-    }
-  };
+    };
 
   return (
     <div className="login-bg">
@@ -77,12 +78,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
             <span className="text-[var(--red)]">POWER.</span>
           </h1>
           <p className="mt-8 text-zinc-400 max-w-sm leading-relaxed">
-            Barbarian Performance Athlete Portal. Log every rep, sprint, and jump. 
-            Track your progression. No gimmicks — just results.
+            Barbarian Performance Athlete Portal. Track your progression. Log every rep, sprint, and jump.
           </p>
         </div>
         <div className="footer-row text-[10px] opacity-40 uppercase tracking-[0.2em] text-white">
-          Portal v2.4 · Coach Drew Little · 900+ Athletes Trained
+          Portal v2.4 · Coach Drew Little
         </div>
       </div>
 
@@ -166,7 +166,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
               href="sms:+14054749227" 
               className="text-[10px] font-bold text-zinc-400 hover:text-[var(--red)] transition-colors uppercase tracking-widest flex items-center justify-center gap-2"
             >
-              <Icon.Pulse size={14} /> Need Help? Text Coach
+              <Icon.Pulse size={14} /> Need Help? Text Coach.
             </a>
           </div>
         </div>
