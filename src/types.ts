@@ -1,8 +1,8 @@
 export interface Athlete {
   id: number;
-  full_name: string; // Removed | null as these are required for logic
-  sport: string | null;
-  created_at: string | null;
+  full_name: string | any; // Temporary safety to see if data is the issue
+  sport?: string | null;
+  created_at?: string | null;
 }
 
 export interface Metric {
