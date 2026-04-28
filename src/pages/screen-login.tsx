@@ -17,7 +17,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
 
     try {
       if (tab === 'athlete') {
-        const athleteName = typeof name === 'string' ? name : '';
+        const athleteName = String(name || ''); 
         const trimmedName = athleteName.trim();
         
         if (!trimmedName) {
@@ -31,7 +31,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
           .select('*')
           .ilike('full_name', trimmedName)
           .single();
-
+        
         if (sbError || !data) {
           console.error("Athlete Lookup Error:", sbError);
           setError('Athlete not found. Check your spelling or contact Coach Drew.');
