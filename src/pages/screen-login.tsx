@@ -15,12 +15,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
     setError('');
     setLoading(true);
 
-    try {
+  try {
       if (tab === 'athlete') {
-        const athleteName = String(name || ''); 
-        const trimmedName = athleteName.trim();
+        const rawName = String(name || '');
         
-        if (!trimmedName) {
+        if (rawName.length < 2) {
           setError('Please enter your full name.');
           setLoading(false);
           return;
@@ -29,14 +28,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
         const { data, error: sbError } = await supabase
           .from('athletes')
           .select('*')
-          .ilike('full_name', trimmedName)
+          .filter('full_name', 'ilike', `%${rawName}%`)
           .single();
         
         if (sbError || !data) {
           console.error("Athlete Lookup Error:", sbError);
           setError('Athlete not found. Check your spelling or contact Coach Drew.');
         } else {
-          onAthleteLogin(data); // transitions athlete to their dashboard
+          onAthleteLogin(data); 
         }
       } else {
         
