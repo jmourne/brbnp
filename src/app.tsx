@@ -16,21 +16,9 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleAthleteLogin = async (inputName: string) => {
+const handleAthleteLogin = (athleteData: Athlete) => {
     setError(null);
-    
-    const { data, error: sbError } = await supabase
-      .from('athletes')
-      .select('*')
-      .ilike('full_name', inputName.trim())
-      .single();
-
-    if (sbError || !data) {
-      setError("Athlete not found. Please check spelling.");
-      return;
-    }
-
-    setRoute({ name: 'athlete', athlete: data as Athlete });
+    setRoute({ name: 'athlete', athlete: athleteData });
   };
 
   const goLogin = () => {
