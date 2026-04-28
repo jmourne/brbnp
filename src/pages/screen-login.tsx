@@ -44,8 +44,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
         
         const { data: isValid, error: coachError } = await supabase.rpc(
           'check_is_coach', 
-          { provided_code: cleanCode },
-          { schema: 'private' } 
+          { provided_code: cleanCode }
         );
 
         if (coachError) {
