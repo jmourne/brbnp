@@ -17,7 +17,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onAthleteLogin, onCoac
 
 try {
       if (tab === 'athlete') {
-        const trimmedName = (name || '').trim();
+        const athleteName = typeof name === 'string' ? name : '';
+        const trimmedName = athleteName.trim();
         
         if (!trimmedName) {
           setError('Please enter your full name.');
@@ -126,7 +127,7 @@ try {
                     placeholder="John Smith" 
                     className="w-full bg-white border border-zinc-200 p-4 pl-12 rounded outline-none focus:border-[var(--red)] transition-all text-black"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => setName(e.target.value.toString())} 
                   />
                 </div>
               </div>
